@@ -1,0 +1,93 @@
+# Docker
+
+## Bluetooth in Docker
+
+I need to do special stuff for Bluetooth (and dbus) in Docker
+
+* https://github.com/devbis/ble2mqtt/issues/5
+* https://unix.stackexchange.com/questions/546726/setup-docker-container-to-communicate-with-host-over-d-bus
+* https://forums.docker.com/t/communicate-with-dbus-from-an-unprivileged-container/101549
+* https://askubuntu.com/questions/872792/what-is-xdg-runtime-dir
+* https://github.com/hbldh/bleak/discussions/475
+* https://github.com/hbldh/bleak/issues/94
+* https://github.com/hbldh/bleak/issues/798
+
+## General Instructions
+
+```
+docker build -t vesuvius:latest .
+docker run -dp 1980:1980 vesuvius
+docker container ls
+# container ID from above used below
+docker exec -it f7ecbbadc663 /bin/sh
+```
+
+Docker compose
+
+```
+# don't always need --build
+docker-compose up -d --build
+docker-compose ps
+docker-compose logs vesuvius
+docker-compose exec -it vesuvius /bin/sh
+docker-compose stop
+```
+
+## Docker Raspberry Pi Set Up
+
+From [here](https://dev.to/elalemanyo/how-to-install-docker-and-docker-compose-on-raspberry-pi-1mo)
+
+Or actually [here](https://pumpingco.de/blog/setup-your-raspberry-pi-for-docker-and-docker-compose/)
+
+```
+ssh pi@10.0.1.104
+```
+
+In order to fix the newer images for the pi, I needed to fix a few things:
+
+Issue:
+
+* https://github.com/docker-library/python/issues/674
+
+Fix:
+
+* https://blog.samcater.com/fix-workaround-rpi4-docker-libseccomp2-docker-20/
+
+```
+# Get signing keys to verify the new packages, otherwise they will not install
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
+
+# Add the Buster backport repository to apt sources.list
+echo 'deb http://httpredir.debian.org/debian buster-backports main contrib non-free' | sudo tee -a /etc/apt/sources.list.d/debian-backports.list
+
+sudo apt update
+sudo apt install libseccomp2 -t buster-backports
+```
+
+### Raspberry Pi Cryptography
+
+This is a huge mess
+
+Details about the `cryptography` dependency on rust is here: https://cryptography.io/en/latest/installation/#rust
+
+I had a ton of links to help:
+
+* https://github.com/rust-lang/cargo/issues/8719
+* https://github.com/WeblateOrg/docker/pull/1427/files
+* https://github.com/rust-lang/cargo/issues/7451
+* https://github.com/docker/buildx/issues/395
+* https://github.com/pyca/cryptography/issues/6829
+* https://github.com/matrix-org/synapse/issues/9403
+* https://github.com/pyca/cryptography/issues/6286
+* https://github.com/rust-lang/cargo/issues/9335
+* https://github.com/rust-lang/cargo/issues/10230#issuecomment-1001349815
+* https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=998232
+* https://github.com/pyca/cryptography/issues/6485
+
+#### Rust
+
+Installing rust has instructions:
+
+* https://rust-lang.github.io/rustup/installation/other.html
+* https://static.rust-lang.org/rustup/rustup-init.sh
+* https://forge.rust-lang.org/infra/other-installation-methods.html#which
